@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-100 font-sans text-slate-900 antialiased;
+}
+
+/* Slim scrollbars keep the virtualized list and the sidebar visually calm. */
+@supports (scrollbar-width: thin) {
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-slate-300) transparent;
+  }
+}
+
+.scroll-slim::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scroll-slim::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+  background-color: var(--color-slate-300);
+}
+
+/* The search field ships its own clear button, so drop the WebKit one. */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:where(button, a, input, select):focus-visible {
+  @apply outline-2 outline-offset-2 outline-indigo-500;
+}

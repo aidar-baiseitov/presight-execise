@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+    image: presight-user-directory
+    container_name: presight-user-directory
+    ports:
+      # Override the host port with HOST_PORT=9000 docker compose up if 8080 is taken.
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      PORT: 8080
+      DATABASE_PATH: /data/users.db
+      # Size of the generated dataset, applied the first time the volume is empty.
+      SEED_USERS: ${SEED_USERS:-1000}
+    volumes:
+      # Keeps the seeded SQLite database between `docker compose down` and `up`.
+      - presight-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  presight-data:
