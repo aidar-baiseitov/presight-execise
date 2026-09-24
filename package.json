@@ -14,7 +14,8 @@
     "build": "lerna run build",
     "start": "yarn workspace presight-server start",
     "seed": "yarn workspace presight-server seed",
-    "typecheck": "lerna run typecheck"
+    "typecheck": "lerna run typecheck",
+    "test": "lerna run test"
   },
   "devDependencies": {
     "lerna": "~8.2.1"

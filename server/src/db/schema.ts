@@ -3,6 +3,13 @@
  * facet counts and "match all selected hobbies" are exact set operations rather
  * than string matching.
  */
+
+/**
+ * Stored in SQLite's `PRAGMA user_version`. Bump it whenever `SCHEMA_SQL` changes: a database
+ * created with an older version is treated as unseeded and rebuilt on the next start.
+ */
+export const SCHEMA_VERSION = 2;
+
 export const SCHEMA_SQL = `
 CREATE TABLE nationalities (
   id   INTEGER PRIMARY KEY,
@@ -29,11 +36,15 @@ CREATE TABLE user_hobbies (
   PRIMARY KEY (user_id, hobby_id)
 ) WITHOUT ROWID;
 
--- Sort indexes. Each carries \`id\` so the deterministic tie-breaker stays in the index.
-CREATE INDEX idx_users_first_name  ON users(first_name, id);
-CREATE INDEX idx_users_last_name   ON users(last_name, id);
-CREATE INDEX idx_users_age         ON users(age, id);
-CREATE INDEX idx_users_nationality ON users(nationality_id, id);
+-- Sort indexes. Each carries \`id\` so the deterministic tie-breaker stays in the index, and the
+-- name columns use the same NOCASE collation as the ORDER BY, otherwise SQLite ignores them.
+CREATE INDEX idx_users_first_name ON users(first_name COLLATE NOCASE, id);
+CREATE INDEX idx_users_last_name  ON users(last_name COLLATE NOCASE, id);
+CREATE INDEX idx_users_age        ON users(age, id);
+
+-- Finds the users of the selected nationalities. Sorting by nationality orders by the name
+-- in another table, which no index on \`users\` can serve.
+CREATE INDEX idx_users_nationality ON users(nationality_id);
 
 -- Reverse lookup for hobby filtering and hobby facet counts.
 CREATE INDEX idx_user_hobbies_hobby ON user_hobbies(hobby_id, user_id);

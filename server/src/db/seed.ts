@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import type BetterSqlite3 from "better-sqlite3";
 import { config } from "../config.js";
 import { getDb } from "./connection.js";
-import { DROP_SQL, SCHEMA_SQL } from "./schema.js";
+import { DROP_SQL, SCHEMA_SQL, SCHEMA_VERSION } from "./schema.js";
 import { HOBBIES } from "./data/hobbies.js";
 import { NATIONALITIES } from "./data/nationalities.js";
 
@@ -43,7 +43,11 @@ function pickHobbyIds(count: number, hobbyIds: number[]): number[] {
   return [...picked];
 }
 
-export function seedDatabase(db: BetterSqlite3.Database, userCount: number): void {
+export function seedDatabase(
+  db: BetterSqlite3.Database,
+  userCount: number,
+  { log = true }: { log?: boolean } = {},
+): void {
   faker.seed(42); // deterministic dataset across machines and rebuilds
 
   db.exec(DROP_SQL);
@@ -92,6 +96,9 @@ export function seedDatabase(db: BetterSqlite3.Database, userCount: number): voi
   const hobbyLinks = run();
 
   db.exec("ANALYZE");
+  db.pragma(`user_version = ${SCHEMA_VERSION}`);
+
+  if (!log) return;
 
   const distinctNationalities = db
     .prepare("SELECT COUNT(DISTINCT nationality_id) AS count FROM users")

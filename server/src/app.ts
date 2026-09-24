@@ -1,15 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
+import type BetterSqlite3 from "better-sqlite3";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { config } from "./config.js";
-import { apiRouter } from "./routes/api.js";
+import { createApiRouter } from "./routes/api.js";
 import { ValidationError } from "./validation.js";
 
-export function createApp(): Express {
+export function createApp(db: BetterSqlite3.Database): Express {
   const app = express();
   app.disable("x-powered-by");
 
-  app.use("/api", apiRouter);
+  app.use("/api", createApiRouter(db));
 
   app.use("/api", (_req: Request, res: Response) => {
     res.status(404).json({ error: { code: "NOT_FOUND", message: "Unknown API endpoint" } });
